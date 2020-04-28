@@ -13,7 +13,7 @@ class Nuke2{
 
 		keyboard = new BufferedReader(new InputStreamReader(System.in));
 
-		System.out.println("Please enter a string: ");
+		System.out.print("Please enter a string: ");
 		System.out.flush();     /* Make sure the line is printed immediately. */
 		inputLine = new StringBuilder(keyboard.readLine());
 		inputLength = inputLine.length();
