@@ -30,7 +30,7 @@ class Date {
    *  @return true if and only if the input year is a leap year.
    */
   public static boolean isLeapYear(int year) {
-    return false;                        // replace this line with your solution
+    return true;                        // replace this line with your solution
   }
 
   /** Returns the number of days in a given month.
