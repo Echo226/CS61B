@@ -183,8 +183,8 @@ class Date {
         /* I recommend you write code to test the isLeapYear function! */
         System.out.println("\nTesting isLeapYear.");
         System.out.println("2000 should be true: " + isLeapYear(2000));
-        System.out.println("100 should be false " + isLeapYear(100));
-        System.out.println("1233 should be false " + isLeapYear(1233));
+        System.out.println("100 should be false: " + isLeapYear(100));
+        System.out.println("1233 should be false: " + isLeapYear(1233));
 
 
         System.out.println("\nTesting before and after.");
