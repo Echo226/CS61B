@@ -34,7 +34,7 @@ class Date {
      */
     public Date(String s) {
         String[] mdy = s.split("/");
-        if (mdy.length != 3) {
+        if (mdy.length != 3 || !mdy[0].matches("[0-9]+") || !mdy[1].matches("[0-9]+") || !mdy[2].matches("[0-9]+")) {
             System.out.println("Invalid Date");
             System.exit(0);
         }
