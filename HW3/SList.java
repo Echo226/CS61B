@@ -12,10 +12,6 @@ public class SList {
 
     private SListNode head;
     private int size;
-    /**
-     * Add a tail SListNode object.
-     **/
-    private SListNode tail;
 
     /**
      *  SList() constructs an empty list.
@@ -24,7 +20,6 @@ public class SList {
     public SList() {
         size = 0;
         head = null;
-        tail = null;
     }
 
     /**
@@ -52,9 +47,6 @@ public class SList {
 
     public void insertFront(Object obj) {
         head = new SListNode(obj, head);
-        if (size == 0) {
-            tail = head;
-        }
         size++;
     }
 
@@ -64,12 +56,14 @@ public class SList {
      **/
 
     public void insertEnd(Object obj) {
-        if (tail == null) {
-            tail = new SListNode(obj);
-            head = tail;
+        if (head == null) {
+            head = new SListNode(obj);
         } else {
-            tail.next = new SListNode(obj);
-            tail = tail.next;
+            SListNode node = head;
+            while (node.next != null) {
+                node = node.next;
+            }
+            node.next = new SListNode(obj);
         }
         size++;
     }
@@ -97,6 +91,61 @@ public class SList {
                 position--;
             }
             return currentNode.item;
+        }
+    }
+
+    /**
+     *  squish() takes this list and, wherever two or more consecutive items are
+     *  equals(), it removes duplicate nodes so that only one consecutive copy
+     *  remains.  Hence, no two consecutive items in this list are equals() upon
+     *  completion of the procedure.
+     *
+     *  After squish() executes, the list may well be shorter than when squish()
+     *  began.  No extra items are added to make up for those removed.
+     *
+     *  For example, if the input list is [ 0 0 0 0 1 1 0 0 0 3 3 3 1 1 0 ], the
+     *  output list is [ 0 1 0 3 1 0 ].
+     *
+     *  IMPORTANT:  Be sure you use the equals() method, and not the "=="
+     *  operator, to compare items.
+     **/
+
+    public void squish() {
+        // Fill in your solution here.  (Ours is eleven lines long.)
+        if (size == 0 || size == 1) {
+            return;
+        }
+        SListNode curr = head;
+        while (curr != null && curr.next != null) {
+            if (curr.item.equals(curr.next.item)) {
+                curr.next = curr.next.next;
+                size--;
+            } else {
+                curr = curr.next;
+            }
+        }
+    }
+
+    /**
+     *  twin() takes this list and doubles its length by replacing each node
+     *  with two consecutive nodes referencing the same item.
+     *
+     *  For example, if the input list is [ 3 7 4 2 2 ], the
+     *  output list is [ 3 3 7 7 4 4 2 2 2 2 ].
+     *
+     *  IMPORTANT:  Do not try to make new copies of the items themselves.
+     *  Make new SListNodes, but just copy the references to the items.
+     **/
+
+    public void twin() {
+        // Fill in your solution here.  (Ours is seven lines long.)
+        if (size > 0) {
+            SListNode curr = head;
+            while (curr != null) {
+                curr.next = new SListNode(curr.item, curr.next);
+                size ++;
+                curr = curr.next.next;
+            }
         }
     }
 
@@ -129,24 +178,6 @@ public class SList {
      **/
 
     public static void main (String[] args) {
-        // Fill in your solution for Part I here.
-
-        // Construct a list that looks like: [ 6 9 12 ]
-        SList slist = new SList();
-        slist.insertEnd(new Integer(6));
-        slist.insertEnd(new Integer(9));
-        slist.insertEnd(new Integer(12));
-
-        // Print the resulting list:
-        System.out.println("The list should be [ 6 9 12 ], It is " + slist.toString());
-
-        // Add more lines to change this list to: [ 3 6 9 12 15 ]
-        slist.insertFront(new Integer(3));
-        slist.insertEnd(new Integer(15));
-
-        // Print the resulting list:
-        System.out.println("The list should be [ 3 6 9 12 15 ], It is " + slist.toString());
-
         testEmpty();
         testAfterInsertFront();
         testAfterInsertEnd();
