@@ -1,5 +1,7 @@
 /* PixImage.java */
 
+import java.rmi.activation.ActivationGroup_Stub;
+
 /**
  *  The PixImage class represents an image, which is a rectangular grid of
  *  color pixels.  Each pixel has red, green, and blue intensities in the range
@@ -22,7 +24,7 @@ public class PixImage {
    *  variables MUST be private.
    */
 
-
+  private short[][][] imagerepresentation;
 
 
   /**
@@ -31,29 +33,41 @@ public class PixImage {
    *
    * @param width the width of the image.
    * @param height the height of the image.
+   * @author Xinting
    */
   public PixImage(int width, int height) {
     // Your solution here.
+    imagerepresentation = new short[width][height][3];
+    int x, y, z;
+    for (x = 0; x < width; x++) {
+      for (y = 0; y < height; y++) {
+        for (z = 0; z < 3; z++) {
+          imagerepresentation[x][y][z] = 0;
+        }
+      }
+    }
   }
 
   /**
    * getWidth() returns the width of the image.
    *
    * @return the width of the image.
+   * @author Xinting
    */
   public int getWidth() {
     // Replace the following line with your solution.
-    return 1;
+    return imagerepresentation.length;
   }
 
   /**
    * getHeight() returns the height of the image.
    *
    * @return the height of the image.
+   * @author Xinting
    */
   public int getHeight() {
     // Replace the following line with your solution.
-    return 1;
+    return imagerepresentation[0].length;
   }
 
   /**
@@ -62,10 +76,11 @@ public class PixImage {
    * @param x the x-coordinate of the pixel.
    * @param y the y-coordinate of the pixel.
    * @return the red intensity of the pixel at coordinate (x, y).
+   * @author Xinting
    */
   public short getRed(int x, int y) {
     // Replace the following line with your solution.
-    return 0;
+    return imagerepresentation[x][y][0];
   }
 
   /**
@@ -74,10 +89,11 @@ public class PixImage {
    * @param x the x-coordinate of the pixel.
    * @param y the y-coordinate of the pixel.
    * @return the green intensity of the pixel at coordinate (x, y).
+   * @author Xinting
    */
   public short getGreen(int x, int y) {
     // Replace the following line with your solution.
-    return 0;
+    return imagerepresentation[x][y][1];
   }
 
   /**
@@ -86,10 +102,11 @@ public class PixImage {
    * @param x the x-coordinate of the pixel.
    * @param y the y-coordinate of the pixel.
    * @return the blue intensity of the pixel at coordinate (x, y).
+   * @author Xinting
    */
   public short getBlue(int x, int y) {
     // Replace the following line with your solution.
-    return 0;
+    return imagerepresentation[x][y][2];
   }
 
   /**
@@ -104,9 +121,17 @@ public class PixImage {
    * @param red the new red intensity for the pixel at coordinate (x, y).
    * @param green the new green intensity for the pixel at coordinate (x, y).
    * @param blue the new blue intensity for the pixel at coordinate (x, y).
+   * @author Xinting
    */
   public void setPixel(int x, int y, short red, short green, short blue) {
     // Your solution here.
+    if ((x >= 0 && x <= getWidth()-1) && (y >= 0 && y <= getHeight()-1) &&
+            (red >= 0 && red <= 255) && (green >= 0 && green <= 255) &&
+            (blue >= 0 && blue <= 255)) {
+      imagerepresentation[x][y][0] = red;
+      imagerepresentation[x][y][1] = green;
+      imagerepresentation[x][y][2] = blue;
+    }
   }
 
   /**
@@ -117,10 +142,21 @@ public class PixImage {
    * as a String.
    *
    * @return a String representation of this PixImage.
+   * @author Xinting
    */
   public String toString() {
     // Replace the following line with your solution.
-    return "";
+    String result = "";
+    int width = getWidth();
+    int height = getHeight();
+
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        result = result + getRed(x,y) + "    ";
+      }
+      result = result + '\n';
+    }
+    return result;
   }
 
   /**
@@ -151,10 +187,184 @@ public class PixImage {
    *
    * @param numIterations the number of iterations of box blurring.
    * @return a blurred version of "this" PixImage.
+   *
+   * @author Xinting
    */
   public PixImage boxBlur(int numIterations) {
     // Replace the following line with your solution.
-    return this;
+    int width = getWidth();
+    int height = getHeight();
+    PixImage original_image = this;
+    int i;
+
+    for (i = 0; i < numIterations; i++) {
+
+      // get a extended_image, add a frame to the original image and set all frame_pixels to zero.
+      PixImage extended_image = new PixImage(width + 2, height + 2);
+      for (int y = 0; y < height + 2; y++) {
+        extended_image.setPixel(0, y,(short)0, (short)0, (short)0);
+        extended_image.setPixel(width+1, y,(short)0, (short)0, (short)0);
+      }
+      for (int x = 0; x < width + 2; x++) {
+        extended_image.setPixel(x, 0,(short)0, (short)0, (short)0);
+        extended_image.setPixel(x, height+1,(short)0, (short)0, (short)0);
+      }
+      for (int x = 1; x < width+1; x++) {
+        for (int y = 1; y < height+1; y++) {
+          extended_image.setPixel(x, y, original_image.getRed(x-1, y-1),
+                  original_image.getGreen(x-1, y-1), original_image.getBlue(x-1, y-1));
+        }
+      }
+
+      PixImage blurred_image = new PixImage(width, height);
+      // operation
+      for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+          short[] blurredPixels = original_image.blurredPixels(x, y, extended_image);
+          short redPixel = blurredPixels[0];
+          short greenPixel = blurredPixels[1];
+          short bluePixel = blurredPixels[2];
+          blurred_image.setPixel(x, y, redPixel, greenPixel, bluePixel);
+        }
+      }
+      original_image = blurred_image;
+    }
+    return original_image;
+  }
+
+  /**
+   * blurredPixel() computes the blurred pixel vector (average pixel)
+   * containing RGB value in a vector.
+   * for a given pixel.
+   * @param x the x location of the given pixel.
+   * @param y the y location of the given pixel.
+   * @param extended_image the extended_image.
+   * @return
+   */
+  public short[] blurredPixels(int x, int y, PixImage extended_image) {
+    short[] blurredPixels = new short[3];
+    int width = getWidth();
+    int height = getHeight();
+    int sumRedPixel, sumGreenPixel, sumBluePixel;
+    int numberOfNeighbors;
+    sumRedPixel = extended_image.getRed(x, y) + extended_image.getRed(x, y+1) + extended_image.getRed(x, y+2)
+            + extended_image.getRed(x+1, y) + extended_image.getRed(x+1, y+1) + extended_image.getRed(x+1, y+2)
+            + extended_image.getRed(x+2, y) + extended_image.getRed(x+2, y+1) + extended_image.getRed(x+2, y+2);
+    sumGreenPixel = extended_image.getGreen(x, y) + extended_image.getGreen(x, y+1) + extended_image.getGreen(x, y+2)
+            + extended_image.getGreen(x+1, y) + extended_image.getGreen(x+1, y+1) + extended_image.getGreen(x+1, y+2)
+            + extended_image.getGreen(x+2, y) + extended_image.getGreen(x+2, y+1) + extended_image.getGreen(x+2, y+2);
+    sumBluePixel = extended_image.getBlue(x, y) + extended_image.getBlue(x, y+1) + extended_image.getBlue(x, y+2)
+            + extended_image.getBlue(x+1, y) + extended_image.getBlue(x+1, y+1) + extended_image.getBlue(x+1, y+2)
+            + extended_image.getBlue(x+2, y) + extended_image.getBlue(x+2, y+1) + extended_image.getBlue(x+2, y+2);
+    // three situations?
+    if ((x == 0 && y == 0) || (x == 0 && y == height - 1) || (x == width - 1 && y == 0) || (x == width - 1 && y == height - 1)) {
+      numberOfNeighbors = 4;
+    } else if ((x == 0) || (x == width - 1) || (y == 0) || (y == height - 1)) {
+      numberOfNeighbors = 6;
+    } else {
+      numberOfNeighbors = 9;
+    }
+
+    blurredPixels[0] = (short)(sumRedPixel/numberOfNeighbors);
+    blurredPixels[1] = (short)(sumGreenPixel/numberOfNeighbors);
+    blurredPixels[2] = (short)(sumBluePixel/numberOfNeighbors);
+    return blurredPixels;
+  }
+
+
+  /**
+   * reflectImage() output the reflected image for a given image.
+   * @return the reflected image.
+   * @author Xinting
+   */
+
+  public PixImage reflectImage() {
+    int width = getWidth();
+    int height = getHeight();
+    PixImage reflect_image = new PixImage(width+2, height+2);
+    // nine situations?
+    reflect_image.setPixel(0, 0, getRed(0, 0), getGreen(0, 0), getBlue(0, 0));
+    reflect_image.setPixel(0, height+1, getRed(0, height-1), getGreen(0, height-1), getBlue(0, height-1));
+    reflect_image.setPixel(width+1, 0, getRed(width-1, 0), getGreen(width-1, 0), getBlue(width-1, 0));
+    reflect_image.setPixel(width+1, height+1, getRed(width-1, height-1), getGreen(width-1, height-1), getBlue(width-1, height-1));
+    for (int y = 1; y < height+1; y++) {
+      reflect_image.setPixel(0, y, getRed(0, y-1), getGreen(0, y-1), getBlue(0, y-1));
+      reflect_image.setPixel(width+1, y, getRed(width-1, y-1), getGreen(width-1, y-1), getBlue(width-1, y-1));
+    }
+    for (int x = 1; x < width+1; x++) {
+      reflect_image.setPixel(x, 0, getRed(x-1, 0), getGreen(x-1, 0), getBlue(x-1, 0));
+      reflect_image.setPixel(x, height+1, getRed(x-1, height-1), getGreen(x-1, height-1), getBlue(x-1, height-1));
+    }
+    for (int x = 1; x < width+1; x++) {
+      for (int y = 1; y < height+1; y++) {
+        reflect_image.setPixel(x, y, getRed(x-1, y-1), getGreen(x-1, y-1), getBlue(x-1, y-1));
+      }
+    }
+
+    return reflect_image;
+  }
+
+  /**
+   * sumElementWise() computes the sum of the dot_product of two 2_dimensional arrays.
+   * @param a the first 2_dimensional array.
+   * @param b the second 2_dimensional array.
+   * @return the sum of the dot_product of two 2_dimensional arrays.
+   * @author Xinting
+   */
+  public static int sumElementWise(int[][] a, int[][] b) {
+    int result = 0;
+    int width = a.length;
+    int height = a[0].length;
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        result = result + a[x][y] * b[x][y];
+      }
+    }
+    return result;
+  }
+
+
+  /**
+   * computeGradientV() calculate the gradientVector for the given (x,y) pixel and color channel.
+   * @param x the x position of the given pixel.
+   * @param y the y position of the given pixel.
+   * @param reflected_image the reflected_image which extends the image.
+   * @return the intensity of the output pixel.
+   *
+   * @author Xinting
+   */
+
+  public int[] computeGradientV(int x, int y, PixImage reflected_image) {
+    int[] gradientVector = new int[6];
+
+    int[][] gx_kernel = new int[][] { { 1, 2, 1},
+                                      { 0, 0, 0},
+                                      { -1, -2, -1}};
+    int[][] gy_kernel = new int[][] { {  1,  0,  -1},
+                                      {  2,  0,  -2},
+                                      {  1,  0,  -1}};
+
+    int[][] redNeighbors = new int[][] {{reflected_image.getRed(x, y), reflected_image.getRed(x, y+1), reflected_image.getRed(x, y+2)},
+            {reflected_image.getRed(x+1, y), reflected_image.getRed(x+1, y+1), reflected_image.getRed(x+1, y+2)},
+            {reflected_image.getRed(x+2, y), reflected_image.getRed(x+2, y+1), reflected_image.getRed(x+2, y+2)}};
+
+    int[][] greenNeighbors = new int[][] {{reflected_image.getGreen(x, y), reflected_image.getGreen(x, y+1), reflected_image.getGreen(x, y+2)},
+            {reflected_image.getGreen(x+1, y), reflected_image.getGreen(x+1, y+1), reflected_image.getGreen(x+1, y+2)},
+            {reflected_image.getGreen(x+2, y), reflected_image.getGreen(x+2, y+1), reflected_image.getGreen(x+2, y+2)}};
+
+    int[][] blueNeighbors = new int[][] {{reflected_image.getBlue(x, y), reflected_image.getBlue(x, y+1), reflected_image.getBlue(x, y+2)},
+            {reflected_image.getBlue(x+1, y), reflected_image.getBlue(x+1, y+1), reflected_image.getBlue(x+1, y+2)},
+            {reflected_image.getBlue(x+2, y), reflected_image.getBlue(x+2, y+1), reflected_image.getBlue(x+2, y+2)}};
+
+    gradientVector[0] = PixImage.sumElementWise(gx_kernel, redNeighbors);
+    gradientVector[1] = PixImage.sumElementWise(gy_kernel, redNeighbors);
+    gradientVector[2] = PixImage.sumElementWise(gx_kernel, greenNeighbors);
+    gradientVector[3] = PixImage.sumElementWise(gy_kernel, greenNeighbors);
+    gradientVector[4] = PixImage.sumElementWise(gx_kernel, blueNeighbors);
+    gradientVector[5] = PixImage.sumElementWise(gy_kernel, blueNeighbors);
+
+
+    return gradientVector;
   }
 
   /**
@@ -182,6 +392,7 @@ public class PixImage {
     return intensity;
   }
 
+
   /**
    * sobelEdges() applies the Sobel operator, identifying edges in "this"
    * image.  The Sobel operator computes a magnitude that represents how
@@ -199,9 +410,33 @@ public class PixImage {
    */
   public PixImage sobelEdges() {
     // Replace the following line with your solution.
-    return this;
     // Don't forget to use the method mag2gray() above to convert energies to
     // pixel intensities.
+    int width = getWidth();
+    int height = getHeight();
+    PixImage result_image = new PixImage(width, height);
+    PixImage reflected_image = reflectImage();
+
+
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        // compute the gradient vector (red_gx, red_gy, green_gx, green_gy, blue_gx, blue_gy)
+        int[] GradientV = computeGradientV(x, y, reflected_image);
+
+        // compute the energy = red_gx^2 + red_gy^2 + green_gx^2 + green_gy^2 + blue_gx^2 + blue_gy^2  -> long
+        long energy = (long)(Math.pow(GradientV[0], 2) + Math.pow(GradientV[1], 2) +
+                Math.pow(GradientV[2], 2) + Math.pow(GradientV[3], 2) +
+                Math.pow(GradientV[4], 2) + Math.pow(GradientV[5], 2));
+        // compute the intensity using "mag2gray" method -> short
+        short intensity = PixImage.mag2gray(energy);
+        // set each pixel on (x,y) location of result_image
+        result_image.setPixel(x, y, intensity, intensity, intensity);
+      }
+    }
+
+
+    return result_image;
+
   }
 
 
@@ -337,5 +572,8 @@ public class PixImage {
            array2PixImage(new int[][] { { 122, 143, 74 },
                                         { 74, 143, 122 } })),
            "Incorrect Sobel:\n" + image2.sobelEdges());
+
+
+
   }
 }
